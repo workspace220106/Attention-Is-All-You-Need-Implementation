@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Build and temp
+dist/
+.vite/
+*.timestamp-*.mjs
+
+# System & OS
+.DS_Store
+Thumbs.db
+
+# Output data (optional local cache)
+# attention_data.json

@@ -1,0 +1,589 @@
+<title>Transformer Attention Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-dim: #F3F3F0;
+  --text: #222;
+  --text-2: #555;
+  --text-3: #888;
+  --blue: #3366CC;
+  --blue-bg: rgba(51,102,204,0.06);
+  --red: #C0392B;
+  --red-bg: rgba(192,57,43,0.06);
+  --green: #1E8449;
+  --green-bg: rgba(30,132,73,0.06);
+  --border: #E5E5E0;
+  --border-2: #D0D0CA;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --r: 6px;
+  --mono: 'JetBrains Mono', monospace;
+  --serif: 'Literata', Georgia, serif;
+  --sans: 'Source Sans 3', system-ui, sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#18191C; --surface:#1F2023; --surface-dim:#27282C;
+    --text:#D8D8D4; --text-2:#9A9A96; --text-3:#6A6A66;
+    --blue:#6699EE; --blue-bg:rgba(102,153,238,0.08);
+    --red:#E56B5E; --red-bg:rgba(229,107,94,0.08);
+    --green:#4EBF7A; --green-bg:rgba(78,191,122,0.08);
+    --border:#333336; --border-2:#444448;
+    --shadow:0 1px 3px rgba(0,0,0,0.2);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#18191C; --surface:#1F2023; --surface-dim:#27282C;
+  --text:#D8D8D4; --text-2:#9A9A96; --text-3:#6A6A66;
+  --blue:#6699EE; --blue-bg:rgba(102,153,238,0.08);
+  --red:#E56B5E; --red-bg:rgba(229,107,94,0.08);
+  --green:#4EBF7A; --green-bg:rgba(78,191,122,0.08);
+  --border:#333336; --border-2:#444448;
+  --shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  padding-inline:24px; padding-block:0;
+  max-width:1060px; margin:0 auto;
+}
+
+/* — Header — */
+header{padding:32px 0 20px;border-bottom:1px solid var(--border);margin-bottom:28px}
+header h1{font-family:var(--serif);font-size:1.5rem;font-weight:600;margin:0 0 2px;letter-spacing:-0.02em}
+header p{color:var(--text-3);font-size:0.82rem;margin:0}
+header p a{color:var(--blue);text-decoration:none}
+
+/* — Tabs — */
+nav.tabs{display:flex;gap:0;margin-bottom:32px}
+nav.tabs button{
+  padding:8px 20px; border:1px solid var(--border); background:var(--surface);
+  color:var(--text-2); font:600 0.82rem var(--sans); cursor:pointer;
+  transition:background .12s,color .12s;
+}
+nav.tabs button:first-child{border-radius:var(--r) 0 0 var(--r)}
+nav.tabs button:last-child{border-radius:0 var(--r) var(--r) 0;border-left:0}
+nav.tabs button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.page{display:none}.page.on{display:block}
+
+/* — Shared — */
+h2{font-family:var(--serif);font-size:1.15rem;font-weight:600;margin:0 0 14px;letter-spacing:-0.01em}
+h3{font-family:var(--serif);font-size:1rem;font-weight:600;margin:0 0 6px}
+.small{font-size:0.78rem;color:var(--text-2)}
+.mono{font-family:var(--mono);font-size:0.78rem}
+.field{margin-bottom:20px}
+.field label{display:block;font-size:0.78rem;color:var(--text-3);margin-bottom:5px;font-weight:600}
+.field input[type=text],.field select{
+  width:100%;max-width:460px;padding:8px 12px;
+  border:1px solid var(--border-2);border-radius:var(--r);
+  background:var(--surface);color:var(--text);
+  font:inherit;font-size:0.88rem;outline:none;
+}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-bg)}
+
+/* — Controls — */
+.controls{
+  display:flex;flex-wrap:wrap;gap:28px;align-items:end;
+  padding:18px 20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:24px;
+}
+.ctrl{display:flex;flex-direction:column;gap:4px}
+.ctrl span.k{font-size:0.75rem;color:var(--text-3)}
+.ctrl span.v{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--text);line-height:1}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100px;height:3px;background:var(--border-2);border-radius:2px;outline:none;margin-top:4px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--text);cursor:pointer;border:2px solid var(--surface);
+}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--text);cursor:pointer;border:2px solid var(--surface);
+}
+.config-line{
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+  font-size:0.78rem;color:var(--text-3);display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+}
+.config-line code{font-family:var(--mono);color:var(--text-2);font-size:0.76rem}
+
+/* — Grid — */
+.two-col{display:grid;grid-template-columns:1fr 220px;gap:28px;align-items:start}
+@media(max-width:760px){.two-col{grid-template-columns:1fr}}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+
+/* — Head cards — */
+.hcard{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;transition:border-color .15s;
+}
+.hcard:hover{border-color:var(--border-2)}
+.hcard-top{
+  padding:7px 12px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);font-size:0.72rem;color:var(--text-3);
+}
+.hcard-top b{color:var(--text-2);font-weight:600}
+.hcard canvas{display:block;max-width:100%}
+.hcard-cv{padding:6px;overflow-x:auto}
+.hcard-ft{
+  padding:5px 12px 7px;font-size:0.68rem;color:var(--text-3);
+  display:flex;justify-content:space-between;border-top:1px solid var(--border);
+}
+.hcard-ft b{color:var(--text-2)}
+
+/* — Stats — */
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.st{
+  flex:1;min-width:100px;padding:10px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+}
+.st .k{font-size:0.68rem;color:var(--text-3);margin-bottom:3px}
+.st .v{font-family:var(--mono);font-size:1.1rem;font-weight:700}
+.st .u{font-size:0.68rem;color:var(--text-3);font-weight:400;margin-left:2px}
+
+/* — Note — */
+.note{margin-top:18px;padding:12px 16px;background:var(--blue-bg);border-left:2px solid var(--blue);border-radius:0 var(--r) var(--r) 0;font-size:0.8rem;color:var(--text-2);line-height:1.55}
+.note strong{color:var(--text)}
+
+/* — Ref table — */
+.sidebar{position:sticky;top:calc(env(safe-area-inset-top,0px)+20px)}
+.reftable{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.reftable h4{margin:0;padding:10px 14px;font-family:var(--serif);font-size:0.85rem;font-weight:600;border-bottom:1px solid var(--border)}
+.reftable table{width:100%;border-collapse:collapse;font-size:0.72rem;font-variant-numeric:tabular-nums}
+.reftable th{text-align:left;padding:6px 10px;font-size:0.65rem;color:var(--text-3);font-weight:600;border-bottom:1px solid var(--border);background:var(--surface-dim)}
+.reftable td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text-2)}
+.reftable tr.on td{background:var(--blue-bg);color:var(--blue);font-weight:700}
+.reftable tr.base td{font-weight:600;color:var(--text)}
+
+/* — Page 2 — */
+.lang-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+@media(max-width:560px){.lang-pair{grid-template-columns:1fr}}
+.lbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.lbox-h{padding:8px 14px;border-bottom:1px solid var(--border);font-size:0.72rem;color:var(--text-3);font-weight:600}
+.lbox-b{padding:14px;display:flex;flex-wrap:wrap;gap:6px}
+.tok{
+  padding:6px 12px;border:1px solid var(--border-2);border-radius:4px;
+  font-size:0.85rem;cursor:pointer;transition:all .12s;
+  background:var(--surface);user-select:none;line-height:1.3;
+}
+.tok:hover{border-color:var(--blue)}
+.tok.src-on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.tok.tgt-on{background:var(--red);color:#fff;border-color:var(--red)}
+.tok .tw{display:block;font-size:0.6rem;font-family:var(--mono);opacity:.75;margin-top:2px}
+
+.attn-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.attn-tabs button{
+  padding:6px 14px;border:1px solid var(--border-2);border-radius:4px;
+  background:var(--surface);color:var(--text-2);
+  font:600 0.76rem var(--sans);cursor:pointer;transition:all .12s;
+}
+.attn-tabs button:hover{border-color:var(--text-2)}
+.attn-tabs button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+.explain{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;margin-bottom:20px;
+}
+.explain p{font-size:0.82rem;color:var(--text-2);margin:0;line-height:1.6}
+.explain code{font-family:var(--mono);font-size:0.76rem;color:var(--text)}
+.explain pre{
+  margin:10px 0 0;padding:10px 14px;background:var(--surface-dim);
+  border-radius:4px;font-family:var(--mono);font-size:0.74rem;
+  color:var(--text-2);overflow-x:auto;white-space:pre;line-height:1.5;
+}
+.tag{display:inline-block;padding:3px 8px;border-radius:3px;font-size:0.68rem;font-weight:600;margin-top:8px}
+.tag.mask{background:var(--red-bg);color:var(--red)}
+.tag.open{background:var(--green-bg);color:var(--green)}
+
+.arch{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:20px;overflow-x:auto}
+.arch svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.arch figcaption{text-align:center;font-size:0.7rem;color:var(--text-3);margin-top:6px;font-style:italic}
+
+.viz{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:22px}
+.ex-btn{
+  padding:4px 10px;border:1px solid var(--border-2);border-radius:4px;
+  background:var(--surface);color:var(--text-2);font:0.72rem var(--sans);
+  cursor:pointer;transition:all .12s;
+}
+.ex-btn:hover{border-color:var(--blue);color:var(--blue)}
+</style>
+
+<header>
+  <h1>Transformer Attention Lab</h1>
+  <p>Based on <a href="#">Vaswani et al., "Attention Is All You Need"</a> (NeurIPS 2017)</p>
+</header>
+
+<nav class="tabs">
+  <button class="on" data-t="comp">Multi-Head Comparator</button>
+  <button data-t="trans">Translator</button>
+</nav>
+
+<!-- ═══ PAGE 1 ═══ -->
+<div class="page on" id="p-comp">
+  <h2>Multi-Head Attention Comparator</h2>
+  <p class="small" style="margin-top:-8px;margin-bottom:20px">
+    Implements <code class="mono">softmax(QK<sup>T</sup>/√d<sub>k</sub>)V</code> from scratch.
+    Adjust the sliders to replicate the ablation study in Table 3, row (A) of the paper.
+  </p>
+
+  <div class="field">
+    <label>Input sentence</label>
+    <input type="text" id="sI" value="The cat sat on the mat">
+  </div>
+
+  <div class="controls" id="ctrls">
+    <div class="ctrl"><span class="k">h (heads)</span><span class="v" id="hV">8</span><input type="range" id="hS" min="1" max="32" value="8"></div>
+    <div class="ctrl"><span class="k">d_model</span><span class="v" id="dmV">512</span><input type="range" id="dmS" min="64" max="1024" value="512" step="64"></div>
+    <div class="ctrl"><span class="k">d_k</span><span class="v" id="dkV">64</span><input type="range" id="dkS" min="8" max="512" value="64" step="8"></div>
+    <div class="ctrl"><span class="k">d_v</span><span class="v" id="dvV">64</span><input type="range" id="dvS" min="8" max="512" value="64" step="8"></div>
+    <div class="config-line" style="width:100%">
+      <code>MultiHead(Q,K,V) = Concat(head₁…headₕ)Wᴼ</code>
+      <span>Params ≈ <b id="pC">—</b></span>
+      <span>Compute ∝ <b id="cC">—</b></span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h2>Attention heads</h2>
+      <div class="cards" id="hG"></div>
+      <div class="stats" id="sR"></div>
+      <div class="note" id="nB"></div>
+    </div>
+    <div class="sidebar">
+      <div class="reftable">
+        <h4>Table 3 — row (A)</h4>
+        <table><thead><tr><th>h</th><th>d_k</th><th>d_v</th><th>BLEU</th></tr></thead><tbody id="rT"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE 2 ═══ -->
+<div class="page" id="p-trans">
+  <h2>Transformer Translator</h2>
+  <p class="small" style="margin-top:-8px;margin-bottom:20px">
+    EN → DE translation showing the three attention types from Section 3.2.3.
+    Click a German token to see what it attends to in the source.
+  </p>
+
+  <div class="field">
+    <label>English sentence</label>
+    <input type="text" id="tIn" value="The cat sat on the mat" placeholder="Type any English sentence…">
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:-12px;margin-bottom:20px">
+    <span class="small" style="line-height:2">Try:</span>
+    <button class="ex-btn" data-s="The cat sat on the mat">The cat sat on the mat</button>
+    <button class="ex-btn" data-s="I love machine learning">I love machine learning</button>
+    <button class="ex-btn" data-s="The weather is nice today">The weather is nice today</button>
+    <button class="ex-btn" data-s="She reads a book every day">She reads a book every day</button>
+    <button class="ex-btn" data-s="We are learning about transformers">We are learning about transformers</button>
+  </div>
+
+  <div class="arch">
+    <figure style="margin:0">
+      <svg viewBox="0 0 640 150" role="img" aria-label="Transformer encoder-decoder: encoder self-attention feeds K,V into decoder cross-attention; decoder also has masked self-attention" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="a1" markerWidth="6" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0,0 6,2.5 0,5" fill="var(--green)"/></marker></defs>
+        <rect x="16" y="16" width="190" height="120" rx="4" fill="none" stroke="var(--border-2)" stroke-width="1"/>
+        <text x="111" y="10" text-anchor="middle" fill="var(--text-3)" font-size="10" font-weight="600" font-family="Source Sans 3,sans-serif">Encoder</text>
+        <rect x="34" y="34" width="154" height="30" rx="3" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1"/>
+        <text x="111" y="53" text-anchor="middle" fill="var(--blue)" font-size="10" font-weight="600" font-family="Source Sans 3,sans-serif">Self-Attention</text>
+        <rect x="34" y="80" width="154" height="30" rx="3" fill="var(--surface-dim)" stroke="var(--border)" stroke-width="1"/>
+        <text x="111" y="99" text-anchor="middle" fill="var(--text-3)" font-size="10" font-family="Source Sans 3,sans-serif">Feed-Forward</text>
+        <rect x="280" y="4" width="340" height="142" rx="4" fill="none" stroke="var(--border-2)" stroke-width="1"/>
+        <text x="450" y="16" text-anchor="middle" fill="var(--text-3)" font-size="10" font-weight="600" font-family="Source Sans 3,sans-serif">Decoder</text>
+        <rect x="296" y="26" width="130" height="34" rx="3" fill="var(--red-bg)" stroke="var(--red)" stroke-width="1"/>
+        <text x="361" y="40" text-anchor="middle" fill="var(--red)" font-size="9.5" font-weight="600" font-family="Source Sans 3,sans-serif">Masked Self-Attn</text>
+        <text x="361" y="52" text-anchor="middle" fill="var(--red)" font-size="7.5" font-family="Source Sans 3,sans-serif" opacity=".7">causal</text>
+        <rect x="472" y="26" width="130" height="34" rx="3" fill="var(--green-bg)" stroke="var(--green)" stroke-width="1"/>
+        <text x="537" y="40" text-anchor="middle" fill="var(--green)" font-size="9.5" font-weight="600" font-family="Source Sans 3,sans-serif">Cross-Attention</text>
+        <text x="537" y="52" text-anchor="middle" fill="var(--green)" font-size="7.5" font-family="Source Sans 3,sans-serif" opacity=".7">enc → dec</text>
+        <rect x="340" y="76" width="190" height="26" rx="3" fill="var(--surface-dim)" stroke="var(--border)" stroke-width="1"/>
+        <text x="435" y="93" text-anchor="middle" fill="var(--text-3)" font-size="10" font-family="Source Sans 3,sans-serif">Feed-Forward</text>
+        <rect x="340" y="112" width="190" height="24" rx="3" fill="var(--surface-dim)" stroke="var(--border)" stroke-width="1"/>
+        <text x="435" y="128" text-anchor="middle" fill="var(--text-3)" font-size="10" font-family="Source Sans 3,sans-serif">Linear + Softmax</text>
+        <path d="M206 49 Q340 22 472 43" fill="none" stroke="var(--green)" stroke-width="1.5" marker-end="url(#a1)"/>
+        <text x="330" y="26" fill="var(--green)" font-size="8" font-weight="600" font-family="Source Sans 3,sans-serif">K, V</text>
+      </svg>
+      <figcaption>Three attention types in the Transformer (§3.2.3)</figcaption>
+    </figure>
+  </div>
+
+  <div class="lang-pair">
+    <div class="lbox"><div class="lbox-h">English (source)</div><div class="lbox-b" id="srcT"></div></div>
+    <div class="lbox"><div class="lbox-h">German (target)</div><div class="lbox-b" id="tgtT"></div></div>
+  </div>
+
+  <div class="attn-tabs">
+    <button class="on" data-type="cross">Encoder-Decoder</button>
+    <button data-type="enc-self">Encoder Self-Attn</button>
+    <button data-type="dec-self">Decoder Masked Self-Attn</button>
+  </div>
+
+  <div class="explain" id="aExp"></div>
+  <h2 id="aTitle">Attention heads — encoder-decoder</h2>
+  <div class="viz" id="tHG"></div>
+
+  <div class="note">
+    <strong>Implementation:</strong> 8-head encoder-decoder with sinusoidal positional encoding (§3.5).
+    The decoder applies a causal mask (future positions → −∞ before softmax) to preserve the auto-regressive property.
+    Type any English sentence to see attention patterns — translation uses a built-in word-level dictionary (200+ words).
+    Click a German token to see its cross-attention over the English source.
+  </div>
+</div>
+
+<script>
+(function(){
+  // Tabs
+  document.querySelectorAll('nav.tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      document.getElementById('p-'+b.dataset.t).classList.add('on');
+      if(b.dataset.t==='trans')initT();
+    });
+  });
+
+  // Math
+  function R(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function M(r,c,g){const m=[];for(let i=0;i<r;i++){m[i]=[];for(let j=0;j<c;j++)m[i][j]=(g()-0.5)*2*Math.sqrt(2/c)}return m}
+  function X(A,B){const r=A.length,n=B.length,c=B[0].length,C=[];for(let i=0;i<r;i++){C[i]=new Array(c).fill(0);for(let k=0;k<n;k++)for(let j=0;j<c;j++)C[i][j]+=A[i][k]*B[k][j]}return C}
+  function T(A){const t=[];for(let j=0;j<A[0].length;j++){t[j]=[];for(let i=0;i<A.length;i++)t[j][i]=A[i][j]}return t}
+  function S(m){return m.map(r=>{const x=Math.max(...r),e=r.map(v=>Math.exp(v-x)),s=e.reduce((a,b)=>a+b,0);return e.map(v=>v/s)})}
+  function A(Q,K,V,dk,mask){const s=X(Q,T(K)),sc=Math.sqrt(dk);for(let i=0;i<s.length;i++)for(let j=0;j<s[i].length;j++){s[i][j]/=sc;if(mask&&mask[i][j])s[i][j]=-1e9}const w=S(s);return{w,o:X(w,V)}}
+  function PE(e,d){for(let p=0;p<e.length;p++)for(let i=0;i<d;i++){const a=p/Math.pow(10000,(2*Math.floor(i/2))/d);e[p][i]+=(i%2===0)?Math.sin(a):Math.cos(a)}}
+  function EN(w){let t=0;for(const r of w){let h=0;for(const v of r)if(v>1e-10)h-=v*Math.log2(v);t+=h}return t/w.length}
+  function FC(w){let t=0;for(const r of w)t+=Math.max(...r);return t/w.length}
+
+  function drawH(cv,w,rl,cl,cr,cg,cb){
+    const nr=rl.length,nc=cl.length,cs=Math.min(28,Math.floor(190/Math.max(nr,nc)));
+    const ls=48,wd=ls+nc*cs+3,ht=ls+nr*cs+3;
+    cv.width=wd;cv.height=ht;cv.style.width=wd+'px';cv.style.height=ht+'px';
+    const x=cv.getContext('2d'),st=getComputedStyle(document.documentElement);
+    x.fillStyle=st.getPropertyValue('--surface').trim();x.fillRect(0,0,wd,ht);
+    x.fillStyle=st.getPropertyValue('--text-3').trim();
+    x.font=Math.min(9,cs-2)+'px Source Sans 3,sans-serif';
+    x.textAlign='right';x.textBaseline='middle';
+    for(let i=0;i<nr;i++){const l=rl[i].length>6?rl[i].slice(0,5)+'…':rl[i];x.fillText(l,ls-4,ls+i*cs+cs/2)}
+    x.textAlign='center';x.textBaseline='top';
+    for(let j=0;j<nc;j++){x.save();x.translate(ls+j*cs+cs/2,ls-4);x.rotate(-Math.PI/4);const l=cl[j].length>6?cl[j].slice(0,5)+'…':cl[j];x.fillText(l,0,0);x.restore()}
+    for(let i=0;i<nr;i++)for(let j=0;j<nc;j++){
+      const v=w[i][j];
+      x.fillStyle='rgba('+cr+','+cg+','+cb+','+(0.04+v*0.88)+')';
+      x.fillRect(ls+j*cs+0.5,ls+i*cs+0.5,cs-1,cs-1);
+    }
+  }
+
+  // ═══ Page 1 ═══
+  const T3=[{h:8,dk:64,dv:64,b:25.8,l:'base'},{h:1,dk:512,dv:512,b:24.9},{h:4,dk:128,dv:128,b:25.5},{h:16,dk:32,dv:32,b:25.8},{h:32,dk:16,dv:16,b:25.4}];
+  function refT(h,dk,dv){
+    document.getElementById('rT').innerHTML=T3.map(r=>{
+      const c=(r.h===h&&r.dk===dk&&r.dv===dv)?'on':r.l==='base'?'base':'';
+      return '<tr class="'+c+'"><td>'+r.h+'</td><td>'+r.dk+'</td><td>'+r.dv+'</td><td>'+r.b+'</td></tr>';
+    }).join('');
+  }
+  function upd(){
+    const h=+document.getElementById('hS').value,dm=+document.getElementById('dmS').value;
+    const dk=+document.getElementById('dkS').value,dv=+document.getElementById('dvS').value;
+    const toks=(document.getElementById('sI').value.trim()||'The cat sat on the mat').split(/\s+/),n=toks.length;
+    document.getElementById('hV').textContent=h;document.getElementById('dmV').textContent=dm;
+    document.getElementById('dkV').textContent=dk;document.getElementById('dvV').textContent=dv;
+    const tp=h*(dm*dk+dm*dk+dm*dv)+h*dv*dm;
+    document.getElementById('pC').textContent=(tp/1e6).toFixed(2)+'M';
+    document.getElementById('cC').textContent=(h*n*n*dk/1e3).toFixed(1)+'K';
+    refT(h,dk,dv);
+    const e=M(n,dm,R(42));PE(e,dm);
+    const g=document.getElementById('hG');g.innerHTML='';
+    const aE=[],aS=[];
+    for(let i=0;i<h;i++){
+      const r=A(X(e,M(dm,dk,R(7+i*3571))),X(e,M(dm,dk,R(131+i*7919))),X(e,M(dm,dv,R(997+i*4241))),dk);
+      const en=EN(r.w),sp=FC(r.w);aE.push(en);aS.push(sp);
+      const c=document.createElement('div');c.className='hcard';
+      c.innerHTML='<div class="hcard-top"><b>Head '+(i+1)+'</b><span class="mono">'+dk+'×'+dv+'</span></div><div class="hcard-cv"><canvas></canvas></div><div class="hcard-ft"><span>Entropy <b>'+en.toFixed(2)+'</b></span><span>Focus <b>'+(sp*100).toFixed(0)+'%</b></span></div>';
+      g.appendChild(c);drawH(c.querySelector('canvas'),r.w,toks,toks,51,102,204);
+    }
+    const ae=aE.reduce((a,b)=>a+b,0)/h,as=aS.reduce((a,b)=>a+b,0)/h,ev=aE.reduce((a,b)=>a+(b-ae)**2,0)/h;
+    document.getElementById('sR').innerHTML='<div class="st"><div class="k">Avg entropy</div><div class="v">'+ae.toFixed(2)+'<span class="u"> bits</span></div></div><div class="st"><div class="k">Avg focus</div><div class="v">'+(as*100).toFixed(0)+'<span class="u">%</span></div></div><div class="st"><div class="k">Head diversity</div><div class="v">'+Math.sqrt(ev).toFixed(3)+'<span class="u"> σ</span></div></div><div class="st"><div class="k">Parameters</div><div class="v">'+(tp/1e6).toFixed(2)+'<span class="u">M</span></div></div>';
+    const m=T3.find(r=>r.h===h&&r.dk===dk&&r.dv===dv),nb=document.getElementById('nB');
+    if(m)nb.innerHTML='<strong>Table 3 match.</strong> '+(m.l==='base'?'Base model — BLEU '+m.b+' on newstest2013.':m.h===1?'Single head — 0.9 BLEU worse. Averaging inhibits attending to different subspaces.':m.h===32?'32 heads with d_k=16 — quality drops because each head has too little capacity.':'BLEU '+m.b+'. Keeping compute constant trades subspace count for per-head capacity.');
+    else nb.innerHTML='<strong>Custom config.</strong> The paper tested h ∈ {1, 4, 8, 16, 32} with d_k = d_v = d_model/h. You\'re using h='+h+', d_k='+dk+', d_v='+dv+'.'+(dk<16?' Small d_k may hurt compatibility scoring.':'')+(h>16?' Many small heads may lack capacity.':'');
+  }
+  let t1;function db(){clearTimeout(t1);t1=setTimeout(upd,80)}
+  ['hS','dmS','dkS','dvS'].forEach(id=>document.getElementById(id).addEventListener('input',db));
+  document.getElementById('sI').addEventListener('input',db);upd();
+
+  // ═══ Page 2 ═══
+  const DICT={
+    'the':'der','a':'ein','an':'ein','is':'ist','are':'sind','was':'war','were':'waren',
+    'i':'ich','you':'du','he':'er','she':'sie','it':'es','we':'wir','they':'sie',
+    'my':'mein','your':'dein','his':'sein','her':'ihr','our':'unser','their':'ihr',
+    'and':'und','or':'oder','but':'aber','not':'nicht','no':'nein','yes':'ja',
+    'in':'in','on':'auf','at':'an','to':'zu','from':'von','with':'mit','for':'für',
+    'of':'von','by':'von','about':'über','between':'zwischen','under':'unter',
+    'cat':'Katze','dog':'Hund','house':'Haus','book':'Buch','tree':'Baum',
+    'water':'Wasser','fire':'Feuer','sun':'Sonne','moon':'Mond','star':'Stern',
+    'love':'liebe','like':'mag','have':'habe','has':'hat','had':'hatte',
+    'go':'gehe','come':'komme','see':'sehe','know':'weiß','think':'denke',
+    'say':'sage','tell':'erzähle','give':'gebe','take':'nehme','make':'mache',
+    'want':'will','need':'brauche','can':'kann','will':'werde','would':'würde',
+    'good':'gut','bad':'schlecht','big':'groß','small':'klein','new':'neu','old':'alt',
+    'nice':'schön','beautiful':'schön','hot':'heiß','cold':'kalt',
+    'man':'Mann','woman':'Frau','child':'Kind','boy':'Junge','girl':'Mädchen',
+    'day':'Tag','night':'Nacht','time':'Zeit','year':'Jahr','today':'heute',
+    'morning':'Morgen','evening':'Abend','world':'Welt','life':'Leben',
+    'sat':'saß','mat':'Matte','weather':'Wetter','reads':'liest','every':'jeden',
+    'machine':'maschinelles','learning':'Lernen','transformers':'Transformatoren',
+    'this':'dies','that':'das','here':'hier','there':'dort','now':'jetzt',
+    'very':'sehr','also':'auch','just':'nur','still':'noch','already':'schon',
+    'never':'nie','always':'immer','often':'oft','sometimes':'manchmal',
+    'food':'Essen','eat':'esse','drink':'trinke','sleep':'schlafe','work':'arbeite',
+    'play':'spiele','run':'laufe','walk':'gehe','read':'lese','write':'schreibe',
+    'speak':'spreche','learn':'lerne','teach':'lehre','help':'helfe','find':'finde',
+    'open':'öffne','close':'schließe','start':'beginne','end':'ende','begin':'beginne',
+    'school':'Schule','student':'Student','teacher':'Lehrer','class':'Klasse',
+    'computer':'Computer','data':'Daten','model':'Modell','attention':'Aufmerksamkeit',
+    'network':'Netzwerk','system':'System','program':'Programm','code':'Code',
+    'language':'Sprache','word':'Wort','sentence':'Satz','text':'Text',
+    'number':'Nummer','one':'eins','two':'zwei','three':'drei','four':'vier','five':'fünf',
+    'happy':'glücklich','sad':'traurig','fast':'schnell','slow':'langsam',
+    'right':'richtig','wrong':'falsch','true':'wahr','false':'falsch',
+    'black':'schwarz','white':'weiß','red':'rot','blue':'blau','green':'grün',
+    'music':'Musik','art':'Kunst','science':'Wissenschaft','math':'Mathematik',
+    'city':'Stadt','country':'Land','river':'Fluss','mountain':'Berg',
+    'car':'Auto','train':'Zug','bird':'Vogel','fish':'Fisch','flower':'Blume',
+    'friend':'Freund','family':'Familie','mother':'Mutter','father':'Vater',
+    'brother':'Bruder','sister':'Schwester','son':'Sohn','daughter':'Tochter',
+    'question':'Frage','answer':'Antwort','problem':'Problem','idea':'Idee',
+    'people':'Leute','thing':'Ding','place':'Ort','way':'Weg','part':'Teil',
+    'does':'tut','do':'tue','did':'tat','been':'gewesen','being':'seiend',
+    'get':'bekomme','got':'bekam','let':'lasse','put':'lege','keep':'behalte',
+    'try':'versuche','use':'benutze','look':'schaue','feel':'fühle','live':'lebe',
+    'die':'sterbe','turn':'drehe','move':'bewege','change':'ändere','follow':'folge',
+    'stop':'stoppe','wait':'warte','send':'sende','pay':'zahle','meet':'treffe',
+    'build':'baue','buy':'kaufe','bring':'bringe','hold':'halte','stand':'stehe',
+    'sit':'sitze','fall':'falle','grow':'wachse','lose':'verliere','win':'gewinne',
+    'deep':'tief','long':'lang','short':'kurz','high':'hoch','low':'niedrig',
+    'light':'Licht','dark':'dunkel','strong':'stark','weak':'schwach',
+    'young':'jung','real':'echt','possible':'möglich','important':'wichtig',
+    'different':'verschieden','same':'gleich','each':'jeder','many':'viele','much':'viel',
+    'some':'einige','any':'irgendein','all':'alle','both':'beide','few':'wenige',
+    'most':'meisten','other':'anderer','own':'eigen','first':'erster','last':'letzter',
+    'next':'nächster','little':'wenig','only':'nur','great':'großartig',
+    'after':'nach','before':'vor','up':'hinauf','down':'hinunter','out':'hinaus',
+    'over':'über','again':'wieder','then':'dann','so':'also','if':'wenn',
+    'because':'weil','when':'wenn','where':'wo','how':'wie','what':'was',
+    'who':'wer','which':'welcher','why':'warum','than':'als','into':'hinein',
+    'through':'durch','during':'während','without':'ohne','against':'gegen',
+    'natural':'natürlich','paper':'Papier','research':'Forschung','result':'Ergebnis',
+    'example':'Beispiel','power':'Kraft','energy':'Energie','information':'Information',
+    'head':'Kopf','hand':'Hand','eye':'Auge','heart':'Herz','face':'Gesicht',
+    'door':'Tür','window':'Fenster','wall':'Wand','table':'Tisch','chair':'Stuhl',
+    'hello':'Hallo','please':'bitte','thank':'danke','sorry':'Entschuldigung',
+    'am':'bin','could':'könnte','should':'sollte','must':'muss','may':'darf',
+    'might':'könnte','shall':'soll'
+  };
+  function translateWord(w){
+    const lo=w.toLowerCase(),de=DICT[lo];
+    if(!de)return w;
+    if(w[0]===w[0].toUpperCase())return de[0].toUpperCase()+de.slice(1);
+    return de;
+  }
+  function translateSentence(en){return en.map(w=>translateWord(w))}
+
+  const DM=64,DK=16,DV=16,H=8;let tS=null,cT='cross',sT=0;
+
+  let realData=null;
+  try{fetch('attention_data.json').then(r=>{if(r.ok)return r.json();throw 0}).then(d=>{
+    realData=d;
+    if(document.getElementById('p-trans').classList.contains('on'))updT();
+  }).catch(()=>{})}catch(e){}
+
+  function cA(src,tgt){
+    const ns=src.length,nt=tgt.length,se=M(ns,DM,R(100)),te=M(nt,DM,R(200));
+    PE(se,DM);PE(te,DM);
+    const cm=[];for(let i=0;i<nt;i++){cm[i]=[];for(let j=0;j<nt;j++)cm[i][j]=j>i}
+    const heads={eS:[],dS:[],cr:[]};
+    for(let h=0;h<H;h++){
+      heads.eS.push(A(X(se,M(DM,DK,R(300+h*1013))),X(se,M(DM,DK,R(400+h*2017))),X(se,M(DM,DV,R(500+h*3019))),DK).w);
+      heads.dS.push(A(X(te,M(DM,DK,R(600+h*4021))),X(te,M(DM,DK,R(700+h*5023))),X(te,M(DM,DV,R(800+h*6029))),DK,cm).w);
+      heads.cr.push(A(X(te,M(DM,DK,R(900+h*7031))),X(se,M(DM,DK,R(1000+h*8039))),X(se,M(DM,DV,R(1100+h*9041))),DK).w);
+    }return heads;
+  }
+  function findRealData(sentence){
+    if(!realData)return null;
+    const s=sentence.trim().toLowerCase();
+    return realData.find(d=>d.source.trim().toLowerCase()===s)||null;
+  }
+  function initT(){updT()}
+  function updT(){
+    const raw=document.getElementById('tIn').value.trim();
+    if(!raw)return;
+    const rd=findRealData(raw);
+    if(rd){
+      const cfg=rd.model_config,ll=cfg.num_layers-1;
+      tS={i:raw,p:{en:rd.source_tokens,de:rd.target_tokens},
+        h:{eS:rd.encoder_self_attention[ll],dS:rd.decoder_self_attention[ll],cr:rd.cross_attention[ll]},
+        nh:cfg.num_heads,dk:cfg.d_k};
+    }else{
+      const en=raw.split(/\s+/),de=translateSentence(en);
+      tS={i:raw,p:{en,de},h:cA(en,de),nh:H,dk:DK};
+    }
+    sT=0;rToks();rType();
+  }
+  function rToks(){
+    const{p,h}=tS,nh=tS.nh||H;
+    const avg=[];for(let i=0;i<p.de.length;i++){avg[i]=new Array(p.en.length).fill(0);for(let hd=0;hd<nh;hd++){if(!h.cr[hd])continue;for(let j=0;j<p.en.length;j++)avg[i][j]+=h.cr[hd][i][j]/nh}}
+    document.getElementById('srcT').innerHTML=p.en.map((t,j)=>{
+      const w=avg[sT][j],hi=w>0.15;
+      return '<span class="tok'+(hi?' src-on':'')+'">'+t+(hi?'<span class="tw">'+(w*100).toFixed(0)+'%</span>':'')+'</span>';
+    }).join('');
+    document.getElementById('tgtT').innerHTML=p.de.map((t,i)=>'<span class="tok'+(i===sT?' tgt-on':'')+'" data-i="'+i+'">'+t+'</span>').join('');
+    document.getElementById('tgtT').querySelectorAll('.tok').forEach(el=>{el.addEventListener('click',()=>{sT=+el.dataset.i;rToks()})});
+  }
+  const INF={
+    cross:{t:'Encoder-decoder attention',h:'Attention heads — encoder-decoder',m:false,
+      d:'Queries come from the <strong>decoder</strong>; keys and values from the <strong>encoder output</strong>. This is how the decoder looks at the input sequence — the bridge between source and target.',
+      eq:'head_i = Attention(Q_dec · W_i^Q,  K_enc · W_i^K,  V_enc · W_i^V)',
+      g:h=>h.cr,rl:p=>p.de,cl:p=>p.en,rgb:[30,132,73]},
+    'enc-self':{t:'Encoder self-attention',h:'Attention heads — encoder self-attention',m:false,
+      d:'All Q, K, V come from the <strong>same encoder layer</strong>. Every position can attend to every other position — no masking. This builds context-aware representations of the input.',
+      eq:'head_i = Attention(X_enc · W_i^Q,  X_enc · W_i^K,  X_enc · W_i^V)',
+      g:h=>h.eS,rl:p=>p.en,cl:p=>p.en,rgb:[51,102,204]},
+    'dec-self':{t:'Decoder masked self-attention',h:'Attention heads — decoder masked self-attention',m:true,
+      d:'Each decoder position can only attend to <strong>earlier positions</strong>. Future positions get set to −∞ before softmax (the causal mask), so the model can\'t cheat by looking ahead.',
+      eq:'scores[i][j] = −∞  where j > i    (causal mask)\nhead_i = Attention(X_dec · W_i^Q,  X_dec · W_i^K,  X_dec · W_i^V,  mask)',
+      g:h=>h.dS,rl:p=>p.de,cl:p=>p.de,rgb:[192,57,43]}
+  };
+  function rType(){
+    const inf=INF[cT],{p,h}=tS;
+    document.getElementById('aExp').innerHTML='<h3>'+inf.t+'</h3><p>'+inf.d+'</p><pre>'+inf.eq+'</pre>'+(inf.m?'<span class="tag mask">Causal mask applied</span>':'<span class="tag open">No mask — full attention</span>');
+    document.getElementById('aTitle').textContent=inf.h;
+    const g=document.getElementById('tHG');g.innerHTML='';
+    const aw=inf.g(h),rl=inf.rl(p),cl=inf.cl(p),nh=tS.nh||H,dk=tS.dk||DK;
+    for(let i=0;i<nh;i++){
+      if(!aw[i])continue;
+      const c=document.createElement('div');c.className='hcard';
+      const en=EN(aw[i]),sp=FC(aw[i]);
+      c.innerHTML='<div class="hcard-top"><b>Head '+(i+1)+'</b><span class="mono">'+dk+'</span></div><div class="hcard-cv"><canvas></canvas></div><div class="hcard-ft"><span>Entropy <b>'+en.toFixed(2)+'</b></span><span>Focus <b>'+(sp*100).toFixed(0)+'%</b></span></div>';
+      g.appendChild(c);drawH(c.querySelector('canvas'),aw[i],rl,cl,inf.rgb[0],inf.rgb[1],inf.rgb[2]);
+    }
+  }
+  document.querySelectorAll('.attn-tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.attn-tabs button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');cT=b.dataset.type;rType();
+    });
+  });
+  let t2;function dbT(){clearTimeout(t2);t2=setTimeout(updT,300)}
+  document.getElementById('tIn').addEventListener('input',dbT);
+  document.querySelectorAll('.ex-btn').forEach(b=>{
+    b.addEventListener('click',()=>{document.getElementById('tIn').value=b.dataset.s;updT()});
+  });
+})();
+</script>
