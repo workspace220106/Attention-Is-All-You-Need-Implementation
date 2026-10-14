@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #F6EFE3;
+  --surface: #EDE3D1;
+  --ink: #2B2420;
+  --muted: #7A6C5D;
+  --accent: #E0A21B;
+  --chilli: #B8371F;
+  --leaf: #4A6B33;
+  --clay: #C8693E;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #1E1915;
+  --surface: #2A231D;
+  --ink: #F2E8D8;
+  --muted: #A8998A;
+  --accent: #E8B23A;
+  --chilli: #D0523A;
+  --leaf: #6B8F4D;
+  --clay: #D98455;
+  color-scheme: dark;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background 500ms cubic-bezier(0.22,1,0.36,1), color 500ms cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Focus ring, respected across keyboard-only navigation */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* The scrolled page uses a single sticky canvas behind content */
+.canvas-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Thin ink rule reused in several sections */
+.rule {
+  height: 1px;
+  background: var(--ink);
+  opacity: 0.14;
+}
+
+/* Honor the OS reduced-motion preference everywhere */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
