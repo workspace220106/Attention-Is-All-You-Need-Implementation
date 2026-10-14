@@ -5,6 +5,7 @@ import { CameraRig } from './CameraRig';
 import { FridgeScene } from './scenes/FridgeScene';
 import { CaptureScene } from './scenes/CaptureScene';
 import { DetectionScene } from './scenes/DetectionScene';
+import { GraphScene } from './scenes/GraphScene';
 import { useReducedMotion } from '../../lib/useReducedMotion';
 
 /**
@@ -22,6 +23,11 @@ export type SceneBundle = {
   captureShake: { current: number };
   // Detection photo plane fade [0..1]
   detect: { current: number };
+  // Pantry graph fade [0..1] and currently-hovered node id (shared with DOM)
+  graph: { current: number };
+  graphHover: { current: string | null };
+  // Recommend scene fade — graph fades out as cards rise
+  recommend: { current: number };
   // Normalised mouse [-1..1, -1..1] for parallax
   mouse: { current: [number, number] };
 };
@@ -65,6 +71,7 @@ export function SceneRoot({ bundle }: { bundle: SceneBundle }) {
             shakeRef={bundle.captureShake}
           />
           <DetectionScene progressRef={bundle.detect} />
+          <GraphScene progressRef={bundle.graph} hoveredRef={bundle.graphHover} />
         </Suspense>
       </Canvas>
     </div>

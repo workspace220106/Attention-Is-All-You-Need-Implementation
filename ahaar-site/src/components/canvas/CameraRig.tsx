@@ -19,7 +19,14 @@ const KEYS: { p: number; pos: [number, number, number]; look: [number, number, n
   { p: 1.5, pos: [0, 0.9, 2.6], look: [0, 0.9, 0] },
   // Detection: flat-on to the photo plane
   { p: 2.5, pos: [0, 0, 3.6], look: [0, 0, 0] },
-  { p: 3.0, pos: [0, 0, 3.4], look: [0, 0, 0] },
+  // Quantity: ease out slightly as the plane dissolves
+  { p: 3.0, pos: [0, 0, 4.2], look: [0, 0, 0] },
+  // Graph: three-quarter view, higher so edges fan out
+  { p: 4.0, pos: [2.2, 1.4, 4.6], look: [0, 0, 0] },
+  { p: 4.5, pos: [1.8, 1.2, 4.2], look: [0, 0, 0] },
+  // Recommend: pull back and up as cards rise
+  { p: 5.0, pos: [0, 1.3, 5.4], look: [0, 0.1, 0] },
+  { p: 6.0, pos: [0, 1.3, 5.4], look: [0, 0.1, 0] },
 ];
 
 function sampleKeyframes(k: number): { pos: THREE.Vector3; look: THREE.Vector3 } {
