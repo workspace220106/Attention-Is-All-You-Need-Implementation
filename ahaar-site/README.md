@@ -18,14 +18,21 @@ npm run build      # production bundle
 
 ## Current state
 
-Base + sections built so far:
+All twelve sections are built:
 
-- `0` Loader
-- `1` Hero — brushed-steel fridge, door opens on scroll
-- `2` Guided Capture — phone viewfinder, five steps, quality gauge
-- `3` Ingredient Detection — photo plane + SVG bounding boxes
-
-Sections 4 – 12 are stubbed with a review break and will be built next.
+- `0`  Loader
+- `1`  Hero — brushed-steel fridge, door opens on scroll
+- `2`  Guided Capture — phone viewfinder, five steps, quality gauge
+- `3`  Ingredient Detection — photo plane + SVG bounding boxes
+- `4`  Quantity Estimation — chips with ticking counts
+- `5`  Pantry Knowledge Graph — 3D node layout with hover isolation
+- `6`  Recommendations — three recipe cards, filters, inline "Why this?"
+- `7`  Family Plate — overhead thali + age/activity sliders
+- `8`  Metabolic Overlay — dashed glucose curve (future scope)
+- `9`  Cook-Along — one step at a time, circular timer, pan colour shift
+- `10` Under the Hood — pipeline + stack labels
+- `11` Trust and Privacy — line-icon triplet
+- `12` Project Footer — team, guide, year, closing line
 
 ## File tree (relevant parts)
 

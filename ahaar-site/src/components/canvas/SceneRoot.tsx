@@ -6,6 +6,8 @@ import { FridgeScene } from './scenes/FridgeScene';
 import { CaptureScene } from './scenes/CaptureScene';
 import { DetectionScene } from './scenes/DetectionScene';
 import { GraphScene } from './scenes/GraphScene';
+import { PlateScene } from './scenes/PlateScene';
+import { PanScene } from './scenes/PanScene';
 import { useReducedMotion } from '../../lib/useReducedMotion';
 
 /**
@@ -28,6 +30,12 @@ export type SceneBundle = {
   graphHover: { current: string | null };
   // Recommend scene fade — graph fades out as cards rise
   recommend: { current: number };
+  // Family plate: fade and per-member portion scale
+  plate: { current: number };
+  portions: { current: [number, number, number, number] };
+  // Cook-along: pan fade and current step index (0..3)
+  pan: { current: number };
+  panStep: { current: number };
   // Normalised mouse [-1..1, -1..1] for parallax
   mouse: { current: [number, number] };
 };
@@ -72,6 +80,8 @@ export function SceneRoot({ bundle }: { bundle: SceneBundle }) {
           />
           <DetectionScene progressRef={bundle.detect} />
           <GraphScene progressRef={bundle.graph} hoveredRef={bundle.graphHover} />
+          <PlateScene progressRef={bundle.plate} portionsRef={bundle.portions} />
+          <PanScene progressRef={bundle.pan} stepRef={bundle.panStep} />
         </Suspense>
       </Canvas>
     </div>

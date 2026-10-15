@@ -27,6 +27,14 @@ const KEYS: { p: number; pos: [number, number, number]; look: [number, number, n
   // Recommend: pull back and up as cards rise
   { p: 5.0, pos: [0, 1.3, 5.4], look: [0, 0.1, 0] },
   { p: 6.0, pos: [0, 1.3, 5.4], look: [0, 0.1, 0] },
+  // Family plate: directly overhead for a top-down thali
+  { p: 7.0, pos: [0, 4.4, 0.001], look: [0, 0, 0] },
+  // Metabolic: pull back and tilt — the dashboard is DOM, scene fades
+  { p: 8.0, pos: [0, 2.4, 4.6], look: [0, 0, 0] },
+  // Cook-along: side view of the pan
+  { p: 9.0, pos: [0, 0.9, 3.8], look: [0, 0.2, 0] },
+  // Hold through the DOM-only sections
+  { p: 10.0, pos: [0, 0.9, 5.4], look: [0, 0, 0] },
 ];
 
 function sampleKeyframes(k: number): { pos: THREE.Vector3; look: THREE.Vector3 } {

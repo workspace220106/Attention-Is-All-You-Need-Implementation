@@ -10,6 +10,12 @@ import { Detection } from './components/sections/Detection';
 import { Quantity } from './components/sections/Quantity';
 import { Graph } from './components/sections/Graph';
 import { Recommend } from './components/sections/Recommend';
+import { FamilyPlate } from './components/sections/FamilyPlate';
+import { Metabolic } from './components/sections/Metabolic';
+import { CookAlong } from './components/sections/CookAlong';
+import { Pipeline } from './components/sections/Pipeline';
+import { Trust } from './components/sections/Trust';
+import { Footer } from './components/sections/Footer';
 import { initSmoothScroll } from './lib/scroll';
 import { useReducedMotion } from './lib/useReducedMotion';
 
@@ -27,6 +33,10 @@ export default function App() {
     graph: { current: 0 },
     graphHover: { current: null },
     recommend: { current: 0 },
+    plate: { current: 0 },
+    portions: { current: [1, 1, 1, 1] },
+    pan: { current: 0 },
+    panStep: { current: 0 },
     mouse: { current: [0, 0] },
   }).current;
 
@@ -48,12 +58,12 @@ export default function App() {
         <Quantity bundle={bundle} />
         <Graph bundle={bundle} />
         <Recommend bundle={bundle} />
-        <section className="relative z-10 py-32 px-6 md:px-10 border-t border-ink/10 mt-20">
-          <p className="text-[0.78rem] uppercase tracking-[0.22em] text-muted">Review break</p>
-          <p className="mt-3 max-w-copy text-ink/70">
-            Sections 7 — 12 (Family Plate, Metabolic, Cook-Along, Pipeline, Trust, Footer) build next.
-          </p>
-        </section>
+        <FamilyPlate bundle={bundle} />
+        <Metabolic bundle={bundle} />
+        <CookAlong bundle={bundle} />
+        <Pipeline bundle={bundle} />
+        <Trust />
+        <Footer />
       </main>
 
       <ScrollHint />

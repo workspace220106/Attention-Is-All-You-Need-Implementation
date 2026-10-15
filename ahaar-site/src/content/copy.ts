@@ -94,6 +94,72 @@ export const copy = {
       },
     ],
   },
+  plate: {
+    kicker: '06 — Family plate',
+    headline: 'One meal. Everyone’s right portion.',
+    sub: 'The same dish, divided to match age and activity for each person at the table.',
+    members: [
+      { name: 'Appa', note: 'Active · 54', portion: 1.05 },
+      { name: 'Amma', note: 'Moderate · 50', portion: 0.9 },
+      { name: 'Aarav', note: 'Teen · 15', portion: 1.0 },
+      { name: 'Diya', note: 'Child · 9', portion: 0.65 },
+    ],
+    items: ['Roti', 'Rice', 'Dal', 'Sabzi'],
+    caption: 'Drag the age and activity sliders to retune portions.',
+  },
+  metabolic: {
+    kicker: '07 — Metabolic overlay',
+    pill: 'Coming soon',
+    headline: 'Glycaemic-aware portioning.',
+    sub: 'Planned: pair AHAAR with a continuous glucose monitor to tune portions to how your body actually responds.',
+    caption: 'Guidance, not medical advice.',
+  },
+  cook: {
+    kicker: '08 — Cook-along',
+    headline: 'One step at a time.',
+    steps: [
+      { title: 'Chop', hint: 'Onion, tomato, spinach. Fine for the gravy.' },
+      { title: 'Temper', hint: 'Hot oil. Cumin. Wait for the first crackle.' },
+      { title: 'Simmer', hint: 'Add paneer. Low flame. Fifteen minutes.' },
+      { title: 'Serve', hint: 'Rest two minutes. Garnish and plate.' },
+    ],
+  },
+  pipeline: {
+    kicker: '09 — Under the hood',
+    headline: 'A straight line from photo to plate.',
+    nodes: [
+      'Photo',
+      'FastAPI',
+      'Vision',
+      'Pantry Graph (Neo4j)',
+      'Recommender (ML)',
+      'Family Plate',
+      'Flutter UI',
+      'Cook-Along',
+    ],
+    stack: [
+      'Flutter', 'FastAPI', 'PostgreSQL', 'Neo4j', 'PyTorch',
+      'YOLOv8', 'CLIP', 'OpenCV', 'scikit-learn', 'XGBoost', 'SHAP',
+    ],
+    future: ['CGM integration', 'Reinforcement learning'],
+  },
+  trust: {
+    kicker: '10 — Trust and privacy',
+    items: [
+      { title: 'Secure login', body: 'JWT and bcrypt. Standard practice, well applied.' },
+      { title: 'Encrypted in transit', body: 'HTTPS everywhere, no plaintext requests.' },
+      { title: 'Your health data stays yours', body: 'Stored for you. Not sold, not shared.' },
+    ],
+    note: 'Guidance, not medical advice.',
+  },
+  footer: {
+    title: 'AHAAR',
+    close: 'Thank you. Questions welcome.',
+    links: [
+      { label: 'Literature survey', href: '#' },
+      { label: 'Contact', href: 'mailto:group19@example.edu' },
+    ],
+  },
   team: {
     group: 'Group 19',
     members: ['Rajiv Agarwal', 'Alan Joseph', 'Aryan Raina'],
