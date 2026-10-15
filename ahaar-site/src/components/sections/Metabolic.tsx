@@ -60,23 +60,17 @@ export function Metabolic({ bundle }: { bundle: SceneBundle }) {
               fill="none"
               stroke="var(--muted)"
               strokeWidth={0.6}
-              strokeDasharray="2 2"
+              strokeDasharray={`${pathLen} ${pathLen}`}
               style={{
                 strokeDashoffset: (1 - drawT) * pathLen,
-                strokeDasharray: `${pathLen} ${pathLen}`,
                 transition: 'stroke-dashoffset 600ms cubic-bezier(0.22,1,0.36,1)',
               }}
             />
-            {/* A dashed overlay once the base line settles */}
-            {drawT > 0.9 && (
-              <path d={path} fill="none" stroke="var(--muted)" strokeWidth={0.6} strokeDasharray="2 2" opacity={0.9} />
-            )}
           </svg>
-          <ul className="mt-6 grid grid-cols-3 gap-4 text-[0.78rem] text-muted">
-            <li><div className="text-ink font-mono text-[1rem]">—</div>Fasting</li>
-            <li><div className="text-ink font-mono text-[1rem]">—</div>Peak</li>
-            <li><div className="text-ink font-mono text-[1rem]">—</div>Return</li>
-          </ul>
+          <p className="mt-6 text-[0.82rem] text-muted max-w-copy">
+            Portions nudged a little smaller when a response like this is predicted.
+            A little larger when it isn't.
+          </p>
         </div>
       </div>
     </section>

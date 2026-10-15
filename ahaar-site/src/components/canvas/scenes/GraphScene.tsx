@@ -38,13 +38,6 @@ const EDGES: [string, string][] = [
   ['paneer', 'tofu'],
 ];
 
-const KIND_COLOR: Record<NodeKind, number> = {
-  ingredient: 0, // clay — set at runtime
-  dish: 0,
-  nutrient: 0,
-  substitute: 0,
-};
-
 function kindColor(k: NodeKind): number {
   switch (k) {
     case 'ingredient': return cssVarInt('clay');
